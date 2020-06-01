@@ -6,3 +6,33 @@
 
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
+
+.counters{
+    text-align: center;
+    text-transform: capitalize;
+
+    strong{
+        display: block;
+        font-size: 1.5em;
+    }
+
+    .answers{
+        margin: 0.2rem;
+        padding: 0.3rem;
+    }
+
+    //class = "answers unanswered"
+    .answers{
+        &.unanswered{
+            border: none;
+        }
+        &.answered{
+            border: 1px solid $green;
+            color: green;
+        }
+        &.answered-best{
+            background-color: green;
+            color: #fff;
+        }
+    }
+}

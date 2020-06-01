@@ -20,4 +20,10 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/questions', 'QuestionsController@index')->name('questions');
+
+//Route::get('/questions', 'QuestionsController@index')->name('questions');
+//Route::get('/questions/{question}', 'QuestionsController@show')->name('questions.show');
+
+//OR
+
+Route::resource('questions', 'QuestionsController');

@@ -10928,3 +10928,32 @@ a.text-dark:focus {
   }
 }
 
+.counters {
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.counters strong {
+  display: block;
+  font-size: 1.5em;
+}
+
+.counters .answers {
+  margin: 0.2rem;
+  padding: 0.3rem;
+}
+
+.counters .answers.unanswered {
+  border: none;
+}
+
+.counters .answers.answered {
+  border: 1px solid #38c172;
+  color: green;
+}
+
+.counters .answers.answered-best {
+  background-color: green;
+  color: #fff;
+}
+

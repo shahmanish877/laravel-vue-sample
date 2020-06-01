@@ -18,4 +18,25 @@ class Question extends Model
         $this->attributes['title'] = $value;
         $this->attributes['slug'] = Str::slug($value);
     }
+
+    public function getUrlAttribute(){
+        return route('questions.show', $this);
+        //return "#";
+    }
+
+    public function getCreatedDateAttribute(){
+        return $this->created_at->diffForHumans(); // x day ago
+        // $this->created_at->format("d/m/Y") //formated date
+    }
+
+    public function getAnswerStatusAttribute(){
+        if($this->answers>0){
+            if($this->best_answer){
+                return "answered-best";
+            }else{
+                return "answered";
+            }
+        }
+        return "unanswered";
+    }
 }
