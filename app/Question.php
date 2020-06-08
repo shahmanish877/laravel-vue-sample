@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Question extends Model
 {
     protected $fillable = ['title', 'body'];
-    
+
     public function user() {
         return $this->belongsTo(User::class);
-    }    
+    }
 
     public function setTitleAttribute($value)
     {
@@ -49,5 +49,10 @@ class Question extends Model
         return $this->hasMany(Answer::class);
         // $question->answers->count()
         // foreach ($question->answers as $answer)
+    }
+
+    public function acceptBestAnswer(Answer $answer){
+        $this->best_answer_id = $answer->id;
+        $this->save();
     }
 }
