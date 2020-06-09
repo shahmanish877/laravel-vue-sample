@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class Question extends Model
 {
@@ -10,6 +11,10 @@ class Question extends Model
 
     public function user() {
         return $this->belongsTo(User::class);
+    }
+
+    public function favourites(){
+        return $this->belongsToMany(User::class, 'favourites_question');
     }
 
     public function setTitleAttribute($value)
@@ -55,4 +60,13 @@ class Question extends Model
         $this->best_answer_id = $answer->id;
         $this->save();
     }
+
+    public function getIsFavouritedAttribute(){
+        return $this->favourites()->where('user_id',Auth::id())->count() > 0;
+    }
+
+    public function getFavouriteCountAttribute(){
+        return $this->favourites()->count();
+    }
+
 }
