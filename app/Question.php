@@ -12,6 +12,16 @@ class Question extends Model
     public function user() {
         return $this->belongsTo(User::class);
     }
+    public function answers()
+    {
+        return $this->hasMany(Answer::class);
+        // $question->answers->count()
+        // foreach ($question->answers as $answer)
+    }
+
+    public function votes(){
+        return $this->morphToMany(User::class,'votable');
+    }
 
     public function favourites(){
         return $this->belongsToMany(User::class, 'favourites_question');
@@ -49,12 +59,7 @@ class Question extends Model
         return \Parsedown::instance()->text($this->body);
     }
 
-    public function answers()
-    {
-        return $this->hasMany(Answer::class);
-        // $question->answers->count()
-        // foreach ($question->answers as $answer)
-    }
+
 
     public function acceptBestAnswer(Answer $answer){
         $this->best_answer_id = $answer->id;
@@ -67,6 +72,14 @@ class Question extends Model
 
     public function getFavouriteCountAttribute(){
         return $this->favourites()->count();
+    }
+
+    public function downVotes(){
+        return $this->votes()->wherePivot('vote',-1);
+    }
+
+    public function upVotes(){
+        return $this->votes()->wherePivot('vote',1);
     }
 
 }

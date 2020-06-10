@@ -11,13 +11,30 @@
                 @foreach ($answers as $answer)
                     <div class="media">
                         <div class="d-fex flex-column vote-controls">
-                            <a title="This answer is useful" class="vote-up">
+                            <a title="This answer is useful" class="vote-up {{ Auth::guest() ? 'off': '' }}"
+                               onclick="event.preventDefault(); document.getElementById('answer_upvote_{{$answer->id}}').submit();"
+                            >
                                 <i class="fas fa-caret-up fa-3x"></i>
                             </a>
-                            <span class="votes-count">1230</span>
-                            <a title="This answer is not useful" class="vote-down off">
-                                <i class="fas fa-caret-down fa-3x"></i>
+                            <form action="{{ route('vote.answer',$answer->id) }}" method="post"
+                                  id="answer_upvote_{{$answer->id}}">
+                                @csrf
+                                <input type="hidden" name="vote" value="1">
+
+                            </form>
+                            <span class="votes-count"> {{ $answer->votes_count }} </span>
+                            <a title="This answer is not useful" class="class="vote-down {{ Auth::guest() ? 'off': '' }}"
+                            onclick="event.preventDefault(); document.getElementById('answer_downvote_{{$answer->id}}').submit();"
+                            >
+                            <i class="fas fa-caret-down fa-3x"></i>
                             </a>
+                            <form action="{{ route('vote.answer',$answer->id) }}" method="post"
+                                  id="answer_downvote_{{$answer->id}}">
+                                @csrf
+                                <input type="hidden" name="vote" value="-1">
+
+                            </form>
+
                             @can('accept', $answer)
 
                                 <a title="Mark this answer as best answer" class="{{ $answer->status }} mt-2"
@@ -42,7 +59,7 @@
                         <div class="media-body">
                             {!! $answer->body_html !!}
                             <div class="row">
-                                <div class="col-4">
+                                <div class="col-5">
                                     <div class="ml-auto">
                                         @can ('update', $answer)
                                             <a href="{{ route('questions.answers.edit', [$question->id, $answer->id]) }}" class="btn btn-sm btn-outline-info">Edit</a>
@@ -56,8 +73,8 @@
                                         @endcan
                                     </div>
                                 </div>
-                                <div class="col-4"></div>
-                                <div class="col-4">
+                                <div class="col-5"></div>
+                                <div class="col-2">
                                     <span class="text-muted">Answered {{ $answer->created_date }}</span>
                                     <div class="media mt-2">
                                         <a href="{{ $answer->user->url }}" class="pr-2">
