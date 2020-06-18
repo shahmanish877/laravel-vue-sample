@@ -1,10 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Question;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class VoteQuestionController extends Controller
 {
@@ -17,7 +15,8 @@ class VoteQuestionController extends Controller
     {
         $vote = (int) request()->vote;
 
-        Auth::user()->votingQuestion($question, $vote);
+        auth()->user()->voteQuestion($question, $vote);
+
         return back();
     }
 }
