@@ -3,35 +3,27 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Auth;
 
 class Question extends Model
 {
+    use VotableTrait;
+    
     protected $fillable = ['title', 'body'];
-
+    
     public function user() {
         return $this->belongsTo(User::class);
-    }
-    public function answers()
-    {
-        return $this->hasMany(Answer::class);
-        // $question->answers->count()
-        // foreach ($question->answers as $answer)
-    }
-
-    public function votes(){
-        return $this->morphToMany(User::class,'votable');
-    }
-
-    public function favourites(){
-        return $this->belongsToMany(User::class, 'favourites_question');
-    }
+    }    
 
     public function setTitleAttribute($value)
     {
         $this->attributes['title'] = $value;
         $this->attributes['slug'] = str_slug($value);
     }
+
+    // public function setBodyAttribute($value)
+    // {
+    //     $this->attributes['body'] = clen($value);
+    // }
 
     public function getUrlAttribute()
     {
@@ -56,30 +48,52 @@ class Question extends Model
 
     public function getBodyHtmlAttribute()
     {
-        return \Parsedown::instance()->text($this->body);
+        return clean($this->bodyHtml());
     }
 
+    public function answers()
+    {
+        return $this->hasMany(Answer::class)->orderBy('votes_count', 'DESC');
+    }
 
-
-    public function acceptBestAnswer(Answer $answer){
+    public function acceptBestAnswer(Answer $answer)
+    {
         $this->best_answer_id = $answer->id;
         $this->save();
     }
 
-    public function getIsFavouritedAttribute(){
-        return $this->favourites()->where('user_id',Auth::id())->count() > 0;
+    public function favorites()
+    {
+        return $this->belongsToMany(User::class, 'favorites')->withTimestamps(); //, 'question_id', 'user_id');
     }
 
-    public function getFavouriteCountAttribute(){
-        return $this->favourites()->count();
+    public function isFavorited()
+    {
+        return $this->favorites()->where('user_id', auth()->id())->count() > 0;
     }
 
-    public function downVotes(){
-        return $this->votes()->wherePivot('vote',-1);
+    public function getIsFavoritedAttribute()
+    {
+        return $this->isFavorited();
     }
 
-    public function upVotes(){
-        return $this->votes()->wherePivot('vote',1);
+    public function getFavoritesCountAttribute()
+    {
+        return $this->favorites->count();
+    }    
+
+    public function getExcerptAttribute()
+    {
+        return $this->excerpt(250);
     }
 
+    public function excerpt($length)
+    {
+        return str_limit(strip_tags($this->bodyHtml()), $length);
+    }
+
+    private function bodyHtml()
+    {
+        return \Parsedown::instance()->text($this->body);
+    }
 }

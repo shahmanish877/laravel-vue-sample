@@ -30,23 +30,8 @@ class User extends Authenticatable
     public function questions()
     {
         return $this->hasMany(Question::class);
-    }
-
-    public function favourites()
-    {
-        return $this->belongsToMany(Question::class, 'favourites_question');
-    }
-
-    public function VoteQuestions()
-    {
-        return $this->morphedByMany(Question::class, 'votable');
-    }
-
-    public function VoteAnswers()
-    {
-        return $this->morphedByMany(Answer::class, 'votable');
-    }
-
+    }  
+    
     public function getUrlAttribute()
     {
         // return route("questions.show", $this->id);
@@ -60,48 +45,55 @@ class User extends Authenticatable
 
     public function getAvatarAttribute()
     {
-        $email = $this->email;
+        $email = $this->email;        
         $size = 32;
 
-        return "https://www.gravatar.com/avatar/" . md5(strtolower(trim($email))) . "?s=" . $size;
+        return "https://www.gravatar.com/avatar/" . md5( strtolower( trim( $email ) ) ) . "?s=" . $size;
     }
 
-    public function votingQuestion(Question $question, $vote)
+    public function favorites()
     {
-        $voteQuestions = $this->VoteQuestions();
+        return $this->belongsToMany(Question::class, 'favorites')->withTimestamps(); //, 'author_id', 'question_id');
+    }
 
-        if ($voteQuestions->where('votable_id', $question->id)->exists()) {
-            $voteQuestions->updateExistingPivot($question, ['vote' => $vote]);
-        } else {
-            $voteQuestions->attach($question, ['vote' => $vote]);
+    public function voteQuestions()
+    {
+        return $this->morphedByMany(Question::class, 'votable');
+    }
+
+    public function voteAnswers()
+    {
+        return $this->morphedByMany(Answer::class, 'votable');
+    }
+
+    public function voteQuestion(Question $question, $vote)
+    {
+        $voteQuestions = $this->voteQuestions();
+        
+        $this->_vote($voteQuestions, $question, $vote);
+    }
+
+    public function voteAnswer(Answer $answer, $vote)
+    {
+        $voteAnswers = $this->voteAnswers();
+        
+        $this->_vote($voteAnswers, $answer, $vote);
+    }   
+    
+    private function _vote($relationship, $model, $vote)
+    {
+        if ($relationship->where('votable_id', $model->id)->exists()) {
+            $relationship->updateExistingPivot($model, ['vote' => $vote]);
+        }
+        else {
+            $relationship->attach($model, ['vote' => $vote]);
         }
 
-        //update vote_count column in question
-        $question->load('votes');
-        $downVotes = (int)$question->downVotes()->sum('vote');
-        $upVotes = (int)$question->upVotes()->sum('vote');
-
-        $question->votes_count = $upVotes + $downVotes;
-        $question->save();
+        $model->load('votes');
+        $downVotes = (int) $model->downVotes()->sum('vote');
+        $upVotes = (int) $model->upVotes()->sum('vote');
+        
+        $model->votes_count = $upVotes + $downVotes;
+        $model->save();
     }
-
-    public function votingAnswer(Answer $answer, $vote)
-    {
-        $voteAnswers = $this->VoteAnswers();
-
-        if ($voteAnswers->where('votable_id', $answer->id)->exists()) {
-            $voteAnswers->updateExistingPivot($answer, ['vote' => $vote]);
-        } else {
-            $voteAnswers->attach($answer, ['vote' => $vote]);
-        }
-
-        //update vote_count column in question
-        $answer->load('votes');
-        $downVotes = (int)$answer->downVotes()->sum('vote');
-        $upVotes = (int)$answer->upVotes()->sum('vote');
-
-        $answer->votes_count = $upVotes + $downVotes;
-        $answer->save();
-    }
-
 }

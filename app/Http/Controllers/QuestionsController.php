@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Question;
 use Illuminate\Http\Request;
 use App\Http\Requests\AskQuestionRequest;
-use Illuminate\Support\Str;
-
 
 class QuestionsController extends Controller
 {
